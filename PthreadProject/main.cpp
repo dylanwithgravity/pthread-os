@@ -19,6 +19,7 @@ int chances = 3;
 
 /* functions used by threads to start execution */
 void *sifter(void *param);
+void *decoder(void *param);
 void *fence(void *param);
 void *hill(void *param);
 void *pinnacle(void *param);
@@ -37,6 +38,7 @@ int main(int argc, const char * argv[]) {
     
     /* Define thread reference variables for each thread being created */
     pthread_t sifterThread;
+    pthread_t decoder;
     pthread_t fenceThread;
     pthread_t hillThread;
     pthread_t pinnacleThread;
@@ -87,6 +89,14 @@ void *sifter(void *message_void_ptr) {
     
     
     return NULL;
+}
+
+/* Test decoder thread method */
+void *decoder(void *message_void_ptr) {
+    string *messaged_ptr = (string *)message_void_ptr;
+    
+    cout << "Decoder thread message: " << *messaged_ptr << endl;
+    cout << "Decoder thread done! Success!" << endl;
 }
 
 /* Test fence thread method */
