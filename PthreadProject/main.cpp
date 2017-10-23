@@ -12,12 +12,6 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <time.h>
-#include <cmath>
-#include <regex>
 
 using namespace std;
 
