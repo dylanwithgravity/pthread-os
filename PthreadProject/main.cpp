@@ -12,12 +12,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <time.h>
-#include <cmath>
-#include <regex>
+
 
 using namespace std;
 
@@ -33,35 +28,33 @@ void *sifter(void *param);
 void *decoder(void *param);
 void *fence(void *param);
 void *hill(void *param);
-void *pinnacle(void *param);
+void *pinnacol(void *param);
 
 
 int main(int argc, const char * argv[]) {
    
     string message = "";
-    int result;
+    
     
     // Define thread reference variable for Sifter thread
     pthread_t sifter_id;
     
     
     // Create  Sifter Thread to execute corresponding method
-    result = pthread_create(&sifter_id, NULL, sifter, (void *) message.c_str());
-    if(result == 0) {
+   
+    if(pthread_create(&sifter_id, NULL, sifter, (void *) message.c_str())) {
+        printf("Error Creating Sifter Thread =(\n");
+    } else {
         printf("Sifter Thread Created!\n");
         
-    } else {
-        printf("Error Creating Sifter Thread =(\n");
-        return 1;
     }
     
-    // wait for Sifter Thread to finish
-    result = pthread_join(sifter_id, NULL);
-    if(result == 0) {
-        printf("Sifter Thread Joined\n");
-    } else {
+    // Wait for Sifter Thread to finish
+    if(pthread_join(sifter_id, NULL)) {
         printf("Error Joining Sifter Thread\n");
-        return 1;
+    } else {
+        printf("Sifter Thread Joined\n");
+        
     }
     
     return 0;
@@ -70,10 +63,10 @@ int main(int argc, const char * argv[]) {
 /*
  Sifter thread method
  */
-void *sifter(void *message_void_ptr) {
+void *sifter(void *param) {
     
     string message;
-    int total_chances = chances, result;
+    int total_chances = chances;
     pthread_t decoder_id;
     
     if(!valid_input) {
@@ -82,7 +75,7 @@ void *sifter(void *message_void_ptr) {
     valid_input = true;
     
     // Ask user for input
-    printf("[%d chances remaining]\nEnter a character string(press 'Return' to complete):\n", chances);
+    printf("You have %d chances\nEnter a character string(press 'Enter' to submit):\n", chances);
     getline(cin, message);
     
     // Check if message has four consecutive *s
@@ -96,9 +89,7 @@ void *sifter(void *message_void_ptr) {
             // Check user_input again for three consecutive *s
             if (user_input.find("***") != string::npos) {
                 chances--;
-                printf("FAILED 1ST CHECKPOINT\n");
-            } else {
-                printf("PASSED 1ST CHECKPOINT\n");
+                } else {
                 // Check message for two consecutive *s
                 location = (int)user_input.find("**");
                 if (location != string::npos) {
@@ -107,10 +98,8 @@ void *sifter(void *message_void_ptr) {
                     // Check user_input again for two consecutive *s
                     if (user_input.find("**") != string::npos) {
                         chances--;
-                        printf("FAILED 2ND CHECKPOINT\n");
-                    } else {
+                      } else {
                         // Check message for one *
-                        printf("PASSED 2ND CHECKPOINT\n");
                         location = (int)user_input.find("*");
                         if(location != string::npos) {
                             // Remove the one star found at location to check again
@@ -118,26 +107,60 @@ void *sifter(void *message_void_ptr) {
                             // check user_input again for one star
                             if (user_input.find("*") != string::npos) {
                                 chances--;
-                                printf("FAILED 3RD CHECKPOINT\n");
                             } else {
-                                printf("PASSED FINAL CHECKPOINT\n");
+                                // Create Decoder Thread
+                                if(pthread_create(&decoder_id, NULL, decoder, (void *) message.c_str())) {
+                                    printf("Error creating Decoder Thread =(\n");
+                                    // wait for Decoder thread to finish
+                                } else {
+                                    printf("Decoder Thread Created!\n");
+                                    // Wait for Decoder thread to finish
+                                    if(pthread_join(decoder_id, NULL)) {
+                                        printf("Error Joining decoder thread\n");
+                                    } else {
+                                        printf("Decoder thread joined!");
+                                    }
+                                }
                             }
                         } else {
                             chances--;
-                            printf("Message missing 1ST part(*)\n");
                         }
                     }
                 } else {
                     chances--;
-                    printf("Message missing 2ND part(**)\n");
                 }
             }
         } else {
             chances--;
-            printf("Message missing 3RD part(***)\n");
         }
-        
+    } else {
+        chances--;
     }
+    
+    // Determine if User still has chances
+    if(chances < total_chances) {
+        if(chances == 0){
+            printf("You've used up all of your chances\n");
+        return NULL;
+        }
+        int i = 0;
+        while(i < 2) {
+            printf("\n");
+            i++;
+        }
+        printf("Invalid Input, Please try again\n");
+        sifter(param);
+    } else {
+        // Reset User chances to 3
+        chances = 3;
+        int i = 0;
+        while(i < 2) {
+            printf("\n");
+            i++;
+        }
+        sifter(param);
+    }
+    
     
 
     
@@ -184,13 +207,13 @@ void *hill(void *message_void_ptr) {
 }
 
 /*
- Test Pinnacle Thread method
+ Test Pinnacol Thread method
  */
-void *pinnacle(void *message_void_ptr) {
+void *pinnacol(void *message_void_ptr) {
     string *message3_ptr = (string *)message_void_ptr;
     
-    cout << "Pinnacle Thread message: " << *message3_ptr << endl;
-    cout << "Pinnalce Thread done! Success!" << endl;
+    cout << "Pinnacol Thread message: " << *message3_ptr << endl;
+    cout << "Pinnacol Thread done! Success!" << endl;
     
     
     return NULL;
