@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <regex>
 
 
 using namespace std;
@@ -66,7 +67,10 @@ int main(int argc, const char * argv[]) {
 void *sifter(void *param) {
     
     string message;
+    
     int total_chances = chances;
+    
+    // Define thread reference variable for Decoder Thread
     pthread_t decoder_id;
     
     if(!valid_input) {
@@ -108,6 +112,11 @@ void *sifter(void *param) {
                             if (user_input.find("*") != string::npos) {
                                 chances--;
                             } else {
+                                // Check if Parts are Null
+                                if(regex_match(message, regex("[* ]*"))) {
+                                cout << " you entered in null" << endl;
+                                chances--;
+                                } else {
                                 // Create Decoder Thread
                                 if(pthread_create(&decoder_id, NULL, decoder, (void *) message.c_str())) {
                                     printf("Error creating Decoder Thread =(\n");
@@ -118,9 +127,10 @@ void *sifter(void *param) {
                                     if(pthread_join(decoder_id, NULL)) {
                                         printf("Error Joining decoder thread\n");
                                     } else {
-                                        printf("Decoder thread joined!");
+                                        printf("Decoder thread joined!\n");
                                     }
                                 }
+                            }
                             }
                         } else {
                             chances--;
@@ -151,14 +161,14 @@ void *sifter(void *param) {
         printf("Invalid Input, Please try again\n");
         sifter(param);
     } else {
-        // Reset User chances to 3
+   /*     // Reset User chances to 3
         chances = 3;
         int i = 0;
         while(i < 2) {
             printf("\n");
             i++;
         }
-        sifter(param);
+        sifter(param); */
     }
     
     
@@ -171,12 +181,39 @@ void *sifter(void *param) {
 /*
  Test decoder thread method
  */
-void *decoder(void *message_void_ptr) {
-    string *messaged_ptr = (string *)message_void_ptr;
+void *decoder(void *param) {
+    string message;
+    string part1;
+    string part2;
+    string part3;
+    string temp;
     
-    cout << "Decoder thread message: " << *messaged_ptr << endl;
-    cout << "Decoder thread done! Success!" << endl;
     
+    if(param) {
+        message = (char*) param;
+        temp = message;
+        // Erase anything before Single * if it is the first start encountered
+        message.erase(message.begin(), message.begin() + message.find('*'));
+        
+        // Locations
+        int loc_star3;
+        int loc_star2;
+        int loc_star1;
+        
+        // Check if User inputs only stars and spaces in
+ /*       loc_star3 = (int)message.find("***");
+        temp.replace(loc_star3, 3, "___");
+        
+        loc_star2 = (int)message.find("**");
+        temp.replace(loc_star2, 2, "__");
+        
+        loc_star1 = (int)message.find("*");
+      */
+        // Regex to check if pattern is only stars and spaces
+       
+        
+        
+    }
     return NULL;
 }
 
